@@ -98,9 +98,7 @@ class ViewController: UIViewController, AVCaptureFileOutputRecordingDelegate {
                     // Because AVCaptureVideoPreviewLayer is the backing layer for AVCamPreviewView and UIView can only be manipulated on main thread.
                     // Note: As an exception to the above rule, it is not necessary to serialize video orientation changes on the AVCaptureVideoPreviewLayer’s connection with other session manipulation.
 
-                    let orientation: AVCaptureVideoOrientation =  AVCaptureVideoOrientation(rawValue: self.interfaceOrientation.rawValue)!
-                    
-                    
+                    let orientation: AVCaptureVideoOrientation = AVCaptureVideoOrientation(rawValue: UIDevice.currentDevice().orientation.rawValue)!
                     (self.previewView.layer as! AVCaptureVideoPreviewLayer).connection.videoOrientation = orientation
                     
                 })
@@ -142,7 +140,7 @@ class ViewController: UIViewController, AVCaptureFileOutputRecordingDelegate {
                 let connection: AVCaptureConnection? = movieFileOutput.connectionWithMediaType(AVMediaTypeVideo)
                 let stab = connection?.supportsVideoStabilization
                 if (stab != nil) {
-                    connection!.enablesVideoStabilizationWhenAvailable = true
+                    connection!.preferredVideoStabilizationMode = AVCaptureVideoStabilizationMode.Auto
                 }
                 
                 self.movieFileOutput = movieFileOutput
@@ -173,7 +171,7 @@ class ViewController: UIViewController, AVCaptureFileOutputRecordingDelegate {
             self.addObserver(self, forKeyPath: "stillImageOutput.capturingStillImage", options:[.Old , .New], context: &CapturingStillImageContext)
             self.addObserver(self, forKeyPath: "movieFileOutput.recording", options: [.Old , .New], context: &RecordingContext)
             
-            NSNotificationCenter.defaultCenter().addObserver(self, selector: "subjectAreaDidChange:", name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: self.videoDeviceInput?.device)
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.subjectAreaDidChange(_:)), name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: self.videoDeviceInput?.device)
             
             
             weak var weakSelf = self
@@ -565,7 +563,7 @@ class ViewController: UIViewController, AVCaptureFileOutputRecordingDelegate {
                 
                 ViewController.setFlashMode(AVCaptureFlashMode.Auto, device: device)
                 
-                NSNotificationCenter.defaultCenter().addObserver(self, selector: "subjectAreaDidChange:", name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: device)
+                NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.subjectAreaDidChange(_:)), name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: device)
                                 
                 self.session!.addInput(videoDeviceInput)
                 self.videoDeviceInput = videoDeviceInput
